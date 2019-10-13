@@ -422,9 +422,8 @@ class TestProjeto(unittest.TestCase):
         info1 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
         info2 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "iphone", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
         info3 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "samsung", "browser":"Chrome", "ip": "192.168.0.1", "ativo": 1}
-        info4 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 0}
-        info5 = {"id_usuario": id_usuario + 50, "id_post": id_post, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
-        info6 = {"id_usuario": id_usuario, "id_post": id_post + 50, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
+        info4 = {"id_usuario": id_usuario + 50, "id_post": id_post, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
+        info5 = {"id_usuario": id_usuario, "id_post": id_post + 50, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
 
         # Adiciona uma visualizacao não existente.
         cria_visualizacao(conn, info1)
@@ -438,14 +437,14 @@ class TestProjeto(unittest.TestCase):
 
         #Tenta adicionar uma visualizacao com usuario inexistente.
         try:
-            cria_visualizacao(conn, info5)
+            cria_visualizacao(conn, info4)
             self.fail('Nao deveria ter adicionado uma visualizacao com usuario inexistente.')
         except ValueError as e:
             pass
 
         #Tenta adicionar uma visualizacao com post inexistente.
         try:
-            cria_visualizacao(conn, info6)
+            cria_visualizacao(conn, info5)
             self.fail('Nao deveria ter adicionado uma visualizacao com post inexistente.')
         except ValueError as e:
             pass
@@ -462,16 +461,12 @@ class TestProjeto(unittest.TestCase):
         id = acha_visualizacao(conn, info3)
         self.assertIsNone(id)
 
-        # Tenta achar uma visualizacao com ativo diferente.
+        # Tenta achar uma visualizacao com usuario diferente.
         id = acha_visualizacao(conn, info4)
         self.assertIsNone(id)
 
-        # Tenta achar uma visualizacao com usuario diferente.
-        id = acha_visualizacao(conn, info5)
-        self.assertIsNone(id)
-
         # Tenta achar uma visualizacao com post diferente.
-        id = acha_visualizacao(conn, info6)
+        id = acha_visualizacao(conn, info5)
         self.assertIsNone(id)
 
     def test_remove_view(self):
@@ -562,44 +557,119 @@ class TestProjeto(unittest.TestCase):
         cria_post(conn, info_post)
         id_post = acha_post(conn, info_post)
 
-        info1 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
-        info2 = {"id_usuario": id_usuario, "id_post": id_post, "instante": datetime.datetime(2019, 10, 13, 18, 16, 4), "aparelho": "iphone", "browser":"Chrome", "ip": "192.168.0.1", "ativo": 0}
-        info3 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "DELL", "browser":"Explorer", "ip": "192.168.0.2", "ativo": 1}
-        info4 = {"id_usuario": id_usuario + 50, "id_post": id_post, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
-        info5 = {"id_usuario": id_usuario, "id_post": id_post + 50, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
+        info1 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "iphone", "browser":"Chrome", "ip": "192.168.0.1", "ativo": 1}
+        info2 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "DELL", "browser":"Explorer", "ip": "192.168.0.2", "ativo": 1}
+        info3 = {"id_usuario": id_usuario + 50, "id_post": id_post, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
+        info4 = {"id_usuario": id_usuario, "id_post": id_post + 50, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
 
         cria_visualizacao(conn, info1)
-
-        cria_visualizacao2(conn, info2)
-        id = acha_visualizacao(conn, info2)
-
-        # Tenta mudar info para uma visualizacao já existente.
-        try:
-            muda_info_visualizacao(conn, id, info1)
-            self.fail('Não deveria ter mudado os dados para o de uma visualizacao ja existente.')
-        except ValueError as e:
-            pass
+        id = acha_visualizacao(conn, info1)
 
         # Tenta mudar info para um usuario inexistente.
         try:
-            muda_info_visualizacao(conn, id, info4)
+            muda_info_visualizacao(conn, id, info3)
             self.fail('Não deveria ter mudado para um usuario inexistente.')
         except ValueError as e:
             pass
 
         # Tenta mudar info para um post inexistente.
         try:
-            muda_info_visualizacao(conn, id, info5)
+            muda_info_visualizacao(conn, id, info4)
             self.fail('Não deveria ter mudado para um usuario inexistente.')
         except ValueError as e:
             pass
 
         # Tenta mudar info para uma visualizacao inexistente.
-        muda_info_visualizacao(conn, id, info3)
+        muda_info_visualizacao(conn, id, info2)
 
         # Verifica se mudou.
-        id_novo = acha_visualizacao(conn, info3)
+        id_novo = acha_visualizacao(conn, info2)
         self.assertEqual(id, id_novo)
+
+    #Testes para preferencia(usuario_passaro):
+
+    def test_tabela_perigo_comida(self):
+        conn = self.__class__.connection
+
+        # Cria alguns usuarios.
+        info_user_1 = {"nome": "Alessandra", "email": "email@email.com", "cidade": "sao paulo", "ativo": 1}
+        info_user_2 = {"nome": "Mario", "email": "mario@email.com", "cidade": "curitiba", "ativo": 0}
+
+        cria_usuario(conn, info_user_1)
+        id_usuario1 = acha_usuario(conn, info_user_1)
+
+        cria_usuario(conn, info_user_2)
+        id_usuario2 = acha_usuario(conn, info_user_2)
+
+        # Cria alguns passaros.
+        info_bird_1 = {"nome": "gaivota", "ativo": 1}
+        info_bird_2 = {"nome": "canario", "ativo": 0}
+        info_bird_3 = {"nome": "beija-flor", "ativo": 1}
+        info_bird_4 = {"nome": "papagaio", "ativo": 0}     
+
+        cria_passaro(conn, info_bird_1)
+        id_bird1 = acha_passaro(conn, info_bird_1)
+
+        cria_passaro(conn, info_bird_2)
+        id_bird2 = acha_passaro(conn, info_bird_2)
+
+        cria_passaro(conn, info_bird_3)
+        id_bird3 = acha_passaro(conn, info_bird_3)
+
+        cria_passaro(conn, info_bird_4)
+        id_bird4 = acha_passaro(conn, info_bird_4)
+
+        # Conecta usuarios e passaros.
+        adiciona_usuario_passaro(conn, id_usuario1, id_bird1)
+        adiciona_usuario_passaro(conn, id_usuario2, id_bird1)
+        adiciona_usuario_passaro(conn, id_usuario1, id_bird4)
+        adiciona_usuario_passaro(conn, id_usuario2, id_bird4)
+        adiciona_usuario_passaro(conn, id_usuario1, id_bird2)
+        adiciona_usuario_passaro(conn, id_usuario2, id_bird3)
+
+        res = lista_usuario_de_passaro(conn, id_bird1)
+        self.assertCountEqual(res, (id_usuario1, id_usuario2))
+
+        res = lista_usuario_de_passaro(conn, id_bird2)
+        self.assertCountEqual(res, (id_usuario1,))
+
+        res = lista_usuario_de_passaro(conn, id_bird3)
+        self.assertCountEqual(res, (id_usuario2,))
+
+        res = lista_usuario_de_passaro(conn, id_bird4)
+        self.assertCountEqual(res, (id_usuario1, id_usuario2))
+
+        res = lista_passaro_de_usuario(conn, id_usuario1)
+        self.assertCountEqual(res, (id_bird1, id_bird2, id_bird4))
+
+        res = lista_passaro_de_usuario(conn, id_usuario2)
+        self.assertCountEqual(res, (id_bird1, id_bird3, id_bird4))
+
+        # Testa se a remoção de um usuario causa a remoção das relações entre esse usuario e seus passaros.
+        remove_usuario(conn, id_usuario1)
+
+        res = lista_usuario_de_passaro(conn, id_bird1)
+        self.assertCountEqual(res, (id_usuario2,))
+
+        res = lista_usuario_de_passaro(conn, id_bird4)
+        self.assertCountEqual(res, (id_usuario2,))
+
+        res = lista_usuario_de_passaro(conn, id_bird2)
+        self.assertFalse(res)
+
+        # Testa se a remoção de um passaro causa a remoção das relações entre esse passaro e seus usuarios.
+        remove_passaro(conn, id_bird4)
+
+        res = lista_passaro_de_usuario(conn, id_usuario2)
+        self.assertCountEqual(res, (id_bird1, id_bird3))
+
+        # Testa a remoção específica de uma relação usuario-passaro.
+        remove_usuario_passaro(conn, id_usuario2, id_bird1)
+
+        res = lista_passaro_de_usuario(conn, id_usuario2)
+        self.assertCountEqual(res, (id_bird3,))
+
+
 
 def run_sql_script(filename):
     global config

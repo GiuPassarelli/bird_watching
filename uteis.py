@@ -2,8 +2,8 @@ import pymysql
 
 #USUARIOS
 
-def cria_usuario(connection, info):
-    with connection.cursor() as cursor:
+def cria_usuario(conn, info):
+    with conn.cursor() as cursor:
         try:
             cursor.execute("""INSERT INTO usuario (nome, email, cidade, ativo)
                            VALUES (%s, %s, %s, %s);""", (info["nome"], info["email"], info["cidade"], info["ativo"]))
@@ -41,8 +41,8 @@ def muda_info_usuario(conn, id, info):
 
 #PASSAROS
 
-def cria_passaro(connection, info):
-    with connection.cursor() as cursor:
+def cria_passaro(conn, info):
+    with conn.cursor() as cursor:
         try:
             cursor.execute("""INSERT INTO passaro (nome, ativo)
                            VALUES (%s, %s);""", (info["nome"], info["ativo"]))
@@ -80,12 +80,15 @@ def muda_info_passaro(conn, id, info):
 
 #POSTS
 
-def cria_post(connection, info):
-    with connection.cursor() as cursor:
+def cria_post(conn, info):
+    with conn.cursor() as cursor:
         try:
             cursor.execute("""INSERT INTO post (id_usuario, titulo, texto, foto, ativo)
                            VALUES (%s, %s, %s, %s, %s);""", 
                            (info["id_usuario"], info["titulo"], info["texto"], info["foto"], info["ativo"]))
+            cursor.execute('SELECT id_post FROM post WHERE id_post = LAST_INSERT_ID() LIMIT 1')
+            id_post = cursor.fetchone()
+            parser_texto(conn, info["texto"], id_post)
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não posso inserir {info["titulo"]} na tabela post')
 
@@ -122,21 +125,12 @@ def muda_info_post(conn, id, info):
 
 #Visualizações
 
-def cria_visualizacao(connection, info):
-    with connection.cursor() as cursor:
+def cria_visualizacao(conn, info):
+    with conn.cursor() as cursor:
         try:
             cursor.execute("""INSERT INTO visualizacao (id_usuario, id_post, aparelho, browser, ip, ativo)
                            VALUES (%s, %s, %s, %s, %s, %s);""", 
                            (info["id_usuario"], info["id_post"], info["aparelho"], info["browser"], info["ip"], info["ativo"]))
-        except pymysql.err.IntegrityError as e:
-            raise ValueError(f'Não posso inserir {info["id_usuario"], info["id_post"]} na tabela visualizacao')
-
-def cria_visualizacao2(connection, info):
-    with connection.cursor() as cursor:
-        try:
-            cursor.execute("""INSERT INTO visualizacao (id_usuario, id_post, instante, aparelho, browser, ip, ativo)
-                           VALUES (%s, %s, %s, %s, %s, %s, %s);""", 
-                           (info["id_usuario"], info["id_post"], info["instante"], info["aparelho"], info["browser"], info["ip"], info["ativo"]))
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não posso inserir {info["id_usuario"], info["id_post"]} na tabela visualizacao')
 
@@ -172,3 +166,48 @@ def muda_info_visualizacao(conn, id, info):
                             info["browser"], info["ip"], info["ativo"], id[0], id[1], id[2]))
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não posso alterar info do id {id} na tabela visualizacao')
+
+#Preferencia(usuario_passaro)
+
+def adiciona_usuario_passaro(conn, id_usuario, id_passaro):
+    with conn.cursor() as cursor:
+        cursor.execute('INSERT INTO usuario_passaro (id_usuario, id_passaro, ativo) VALUES (%s, %s, 1)', (id_usuario, id_passaro))
+
+def lista_usuario_de_passaro(conn, id_passaro):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT id_usuario FROM usuario_passaro WHERE id_passaro=%s', (id_passaro))
+        res = cursor.fetchall()
+        usuarios = tuple(x[0] for x in res)
+        return usuarios
+
+def lista_passaro_de_usuario(conn, id_usuario):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT id_passaro FROM usuario_passaro WHERE id_usuario=%s', (id_usuario))
+        res = cursor.fetchall()
+        passaros = tuple(x[0] for x in res)
+        return passaros
+
+def remove_usuario_passaro(conn, id_usuario, id_passaro):
+    with conn.cursor() as cursor:
+        cursor.execute('DELETE FROM usuario_passaro WHERE id_usuario=%s AND id_passaro=%s',(id_usuario, id_passaro))
+
+#Parser
+
+def parser_texto(conn, texto, id_post):
+    for word in texto.split():
+        if(word[0] == '#'):
+            adiciona_post_passaro(conn, word[1:], id_post)
+        if(word[0] == '@'):
+            adiciona_post_usuario(conn, word[1:], id_post)
+
+#Tag(post_passaro)
+
+def adiciona_post_passaro(conn, id_post, id_passaro):
+    with conn.cursor() as cursor:
+        cursor.execute('INSERT INTO post_passaro (id_post, id_passaro, ativo) VALUES (%s, %s, 1)', (id_post, id_passaro))
+
+#Mencao(post_usuario)
+
+def adiciona_post_usuario(conn, id_post, id_usuario):
+    with conn.cursor() as cursor:
+        cursor.execute('INSERT INTO post_usuario (id_post, id_usuario, ativo) VALUES (%s, %s, 1)', (id_post, id_usuario))
