@@ -8,6 +8,7 @@ import subprocess
 import unittest
 import pymysql
 from uteis import *
+import datetime
 
 #TODO: testar update em id
 #      update em coluna e linha que nao existe
@@ -273,7 +274,7 @@ class TestProjeto(unittest.TestCase):
         info5 = {"id_usuario": id_usuario + 50, "titulo": "amo passaros", "texto": "adoro a gaivota s2", "foto":"img.jpg", "ativo": 1}
 
         # Adiciona um post não existente.
-        cria_post(conn, info1)        
+        cria_post(conn, info1)
 
         #Tenta adicionar o mesmo post duas vezes.
         try:
@@ -293,7 +294,7 @@ class TestProjeto(unittest.TestCase):
         id = acha_post(conn, info1)
         self.assertIsNotNone(id)
 
-        # Tenta achar um post com nome diferente.
+        # Tenta achar um post com titulo diferente.
         id = acha_post(conn, info2)
         self.assertIsNone(id)
 
@@ -375,7 +376,7 @@ class TestProjeto(unittest.TestCase):
         info1 = {"id_usuario": id_usuario, "titulo": "amo passaros", "texto": "adoro a gaivota s2", "foto":"img.jpg", "ativo": 1}
         info2 = {"id_usuario": id_usuario, "titulo": "encontrei mais um", "texto": "vi um canario", "foto":"img2.jpg", "ativo": 0}
         info3 = {"id_usuario": id_usuario, "titulo": "conheça a Linda", "texto": "nova na familia", "foto":"img3.jpg", "ativo": 1}
-        info4 = {"id_usuario": id_usuario + 10, "titulo": "encontrei mais um", "texto": "vi um canario", "foto":"img2.jpg", "ativo": 0}
+        info4 = {"id_usuario": id_usuario + 50, "titulo": "encontrei mais um", "texto": "vi um canario", "foto":"img2.jpg", "ativo": 0}
 
         cria_post(conn, info1)
 
@@ -391,7 +392,7 @@ class TestProjeto(unittest.TestCase):
 
         # Tenta mudar info para um usuario inexistente.
         try:
-            muda_info_post(conn, id, info1)
+            muda_info_post(conn, id, info4)
             self.fail('Não deveria ter mudado para um usuario inexistente.')
         except ValueError as e:
             pass
@@ -405,6 +406,200 @@ class TestProjeto(unittest.TestCase):
 
     #Testes para visualizacao:
 
+    def test_add_view(self):
+        conn = self.__class__.connection
+
+        # Adiciona um usuario não existente.
+        info_user = {"nome": "Alessandra", "email": "email@email.com", "cidade": "sao paulo", "ativo": 1}
+        cria_usuario(conn, info_user)
+        id_usuario = acha_usuario(conn, info_user)
+
+        # Adiciona um post não existente.
+        info_post = {"id_usuario": id_usuario, "titulo": "amo passaros", "texto": "adoro a gaivota s2", "foto":"img.jpg", "ativo": 1}
+        cria_post(conn, info_post)
+        id_post = acha_post(conn, info_post)
+
+        info1 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
+        info2 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "iphone", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
+        info3 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "samsung", "browser":"Chrome", "ip": "192.168.0.1", "ativo": 1}
+        info4 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 0}
+        info5 = {"id_usuario": id_usuario + 50, "id_post": id_post, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
+        info6 = {"id_usuario": id_usuario, "id_post": id_post + 50, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
+
+        # Adiciona uma visualizacao não existente.
+        cria_visualizacao(conn, info1)
+
+        #Tenta adicionar a mesma visualizacao duas vezes.
+        try:
+            cria_visualizacao(conn, info1)
+            self.fail('Nao deveria ter adicionado a mesma visualizacao duas vezes.')
+        except ValueError as e:
+            pass
+
+        #Tenta adicionar uma visualizacao com usuario inexistente.
+        try:
+            cria_visualizacao(conn, info5)
+            self.fail('Nao deveria ter adicionado uma visualizacao com usuario inexistente.')
+        except ValueError as e:
+            pass
+
+        #Tenta adicionar uma visualizacao com post inexistente.
+        try:
+            cria_visualizacao(conn, info6)
+            self.fail('Nao deveria ter adicionado uma visualizacao com post inexistente.')
+        except ValueError as e:
+            pass
+
+        # Checa se a visualizacao existe.
+        id = acha_visualizacao(conn, info1)
+        self.assertIsNotNone(id)
+
+        # Tenta achar uma visualizacao com aparelho diferente.
+        id = acha_visualizacao(conn, info2)
+        self.assertIsNone(id)
+
+        # Tenta achar uma visualizacao com 2 informações diferentes.
+        id = acha_visualizacao(conn, info3)
+        self.assertIsNone(id)
+
+        # Tenta achar uma visualizacao com ativo diferente.
+        id = acha_visualizacao(conn, info4)
+        self.assertIsNone(id)
+
+        # Tenta achar uma visualizacao com usuario diferente.
+        id = acha_visualizacao(conn, info5)
+        self.assertIsNone(id)
+
+        # Tenta achar uma visualizacao com post diferente.
+        id = acha_visualizacao(conn, info6)
+        self.assertIsNone(id)
+
+    def test_remove_view(self):
+        conn = self.__class__.connection
+
+        # Adiciona um usuario não existente.
+        info_user = {"nome": "Alessandra", "email": "email@email.com", "cidade": "sao paulo", "ativo": 1}
+        cria_usuario(conn, info_user)
+        id_usuario = acha_usuario(conn, info_user)
+
+        # Adiciona um post não existente.
+        info_post = {"id_usuario": id_usuario, "titulo": "amo passaros", "texto": "adoro a gaivota s2", "foto":"img.jpg", "ativo": 1}
+        cria_post(conn, info_post)
+        id_post = acha_post(conn, info_post)
+
+        info = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
+        
+        cria_visualizacao(conn, info)
+        id = acha_visualizacao(conn, info)
+
+        res = lista_visualizacao(conn)
+        self.assertCountEqual(res, (id,))
+
+        remove_visualizacao(conn, id)
+
+        res = lista_visualizacao(conn)
+        self.assertFalse(res)
+
+    def test_list_view(self):
+        conn = self.__class__.connection
+
+        # Adiciona um usuario não existente.
+        info_user = {"nome": "Alessandra", "email": "email@email.com", "cidade": "sao paulo", "ativo": 1}
+        cria_usuario(conn, info_user)
+        id_usuario = acha_usuario(conn, info_user)
+
+        # Adiciona um usuario não existente.
+        info_user2 = {"nome": "Ale", "email": "ale@email.com", "cidade": "curitiba", "ativo": 0}
+        cria_usuario(conn, info_user2)
+        id_usuario2 = acha_usuario(conn, info_user2)
+
+        # Adiciona um post não existente.
+        info_post = {"id_usuario": id_usuario, "titulo": "amo passaros", "texto": "adoro a gaivota s2", "foto":"img.jpg", "ativo": 1}
+        cria_post(conn, info_post)
+        id_post = acha_post(conn, info_post)
+
+        # Adiciona um post não existente.
+        info_post2 = {"id_usuario": id_usuario2, "titulo": "odeio passaros", "texto": "odeio a gaivota", "foto":"img.jpeg", "ativo": 0}
+        cria_post(conn, info_post2)
+        id_post2 = acha_post(conn, info_post2)
+
+        info1 = {"id_usuario": id_usuario, "id_post": id_post2, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
+        info2 = {"id_usuario": id_usuario2, "id_post": id_post2, "aparelho": "iphone", "browser":"Chrome", "ip": "192.168.0.1", "ativo": 0}
+        info3 = {"id_usuario": id_usuario2, "id_post": id_post, "aparelho": "DELL", "browser":"Explorer", "ip": "192.168.0.2", "ativo": 1}
+
+        # Verifica que ainda não tem visualizacoes no sistema.
+        res = lista_visualizacao(conn)
+        self.assertFalse(res)
+
+        # Adiciona algumas visualizacoes.
+        views_id = []
+        for p in (info1, info2, info3):
+            cria_visualizacao(conn, p)
+            views_id.append(acha_visualizacao(conn, p))
+
+        # Verifica se as visualizacoes foram adicionados corretamente.
+        res = lista_visualizacao(conn)
+        self.assertCountEqual(res, views_id)
+
+        # Remove as visualizacoes.
+        for p in views_id:
+            remove_visualizacao(conn, p)
+
+        # Verifica que todos as visualizacoes foram removidos.
+        res = lista_visualizacao(conn)
+        self.assertFalse(res)
+
+    def test_update_view(self):
+        conn = self.__class__.connection
+
+        # Adiciona um usuario não existente.
+        info_user = {"nome": "Alessandra", "email": "email@email.com", "cidade": "sao paulo", "ativo": 1}
+        cria_usuario(conn, info_user)
+        id_usuario = acha_usuario(conn, info_user)
+
+        # Adiciona um post não existente.
+        info_post = {"id_usuario": id_usuario, "titulo": "amo passaros", "texto": "adoro a gaivota s2", "foto":"img.jpg", "ativo": 1}
+        cria_post(conn, info_post)
+        id_post = acha_post(conn, info_post)
+
+        info1 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
+        info2 = {"id_usuario": id_usuario, "id_post": id_post, "instante": datetime.datetime(2019, 10, 13, 18, 16, 4), "aparelho": "iphone", "browser":"Chrome", "ip": "192.168.0.1", "ativo": 0}
+        info3 = {"id_usuario": id_usuario, "id_post": id_post, "aparelho": "DELL", "browser":"Explorer", "ip": "192.168.0.2", "ativo": 1}
+        info4 = {"id_usuario": id_usuario + 50, "id_post": id_post, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
+        info5 = {"id_usuario": id_usuario, "id_post": id_post + 50, "aparelho": "samsung", "browser":"Firefox", "ip": "192.168.0.0", "ativo": 1}
+
+        cria_visualizacao(conn, info1)
+
+        cria_visualizacao2(conn, info2)
+        id = acha_visualizacao(conn, info2)
+
+        # Tenta mudar info para uma visualizacao já existente.
+        try:
+            muda_info_visualizacao(conn, id, info1)
+            self.fail('Não deveria ter mudado os dados para o de uma visualizacao ja existente.')
+        except ValueError as e:
+            pass
+
+        # Tenta mudar info para um usuario inexistente.
+        try:
+            muda_info_visualizacao(conn, id, info4)
+            self.fail('Não deveria ter mudado para um usuario inexistente.')
+        except ValueError as e:
+            pass
+
+        # Tenta mudar info para um post inexistente.
+        try:
+            muda_info_visualizacao(conn, id, info5)
+            self.fail('Não deveria ter mudado para um usuario inexistente.')
+        except ValueError as e:
+            pass
+
+        # Tenta mudar info para uma visualizacao inexistente.
+        muda_info_visualizacao(conn, id, info3)
+
+        # Verifica se mudou.
+        id_novo = acha_visualizacao(conn, info3)
+        self.assertEqual(id, id_novo)
 
 def run_sql_script(filename):
     global config

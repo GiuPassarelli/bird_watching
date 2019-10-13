@@ -119,3 +119,56 @@ def muda_info_post(conn, id, info):
                            (info["id_usuario"], info["titulo"], info["texto"], info["foto"], info["ativo"], id))
         except pymysql.err.IntegrityError as e:
             raise ValueError(f'Não posso alterar info do id {id} na tabela post')
+
+#Visualizações
+
+def cria_visualizacao(connection, info):
+    with connection.cursor() as cursor:
+        try:
+            cursor.execute("""INSERT INTO visualizacao (id_usuario, id_post, aparelho, browser, ip, ativo)
+                           VALUES (%s, %s, %s, %s, %s, %s);""", 
+                           (info["id_usuario"], info["id_post"], info["aparelho"], info["browser"], info["ip"], info["ativo"]))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não posso inserir {info["id_usuario"], info["id_post"]} na tabela visualizacao')
+
+def cria_visualizacao2(connection, info):
+    with connection.cursor() as cursor:
+        try:
+            cursor.execute("""INSERT INTO visualizacao (id_usuario, id_post, instante, aparelho, browser, ip, ativo)
+                           VALUES (%s, %s, %s, %s, %s, %s, %s);""", 
+                           (info["id_usuario"], info["id_post"], info["instante"], info["aparelho"], info["browser"], info["ip"], info["ativo"]))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não posso inserir {info["id_usuario"], info["id_post"]} na tabela visualizacao')
+
+def acha_visualizacao(conn, info):
+    with conn.cursor() as cursor:
+        cursor.execute("""SELECT id_usuario, id_post, instante FROM visualizacao 
+                       WHERE id_usuario = %s AND id_post = %s AND aparelho = %s AND browser = %s AND ip = %s AND ativo = %s""", 
+                       (info["id_usuario"], info["id_post"], info["aparelho"], info["browser"], info["ip"], info["ativo"]))
+        res = cursor.fetchone()
+        if res:
+            return res
+        else:
+            return None
+
+def lista_visualizacao(conn):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT id_usuario, id_post, instante from visualizacao')
+        res = cursor.fetchall()
+        visualizacoes = tuple((x[0],x[1],x[2]) for x in res)
+        return visualizacoes
+
+def remove_visualizacao(conn, id):
+    with conn.cursor() as cursor:
+        cursor.execute('DELETE FROM visualizacao WHERE id_usuario=%s AND id_post=%s AND instante=%s', (id[0], id[1], id[2]))
+
+def muda_info_visualizacao(conn, id, info):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute("""UPDATE visualizacao 
+                           SET id_usuario = %s, id_post = %s, aparelho = %s, browser = %s, ip = %s, ativo = %s
+                           where id_usuario=%s AND id_post=%s AND instante=%s""",
+                           (info["id_usuario"], info["id_post"], info["aparelho"], 
+                            info["browser"], info["ip"], info["ativo"], id[0], id[1], id[2]))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não posso alterar info do id {id} na tabela visualizacao')
