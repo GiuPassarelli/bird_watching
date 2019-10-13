@@ -13,7 +13,7 @@ CREATE TABLE usuario (
 
 CREATE TABLE passaro (
     id_passaro INT NOT NULL AUTO_INCREMENT,
-    nome VARCHAR(80),
+    nome VARCHAR(80) UNIQUE,
     ativo TINYINT(1) NOT NULL,
     PRIMARY KEY (id_passaro)
 );
@@ -23,10 +23,12 @@ CREATE TABLE usuario_passaro (
     id_usuario INT NOT NULL,
     id_passaro INT NOT NULL,
     PRIMARY KEY (id_usuario, id_passaro),
-    FOREIGN KEY (id_usuario)
-        REFERENCES usuario (id_usuario),
-    FOREIGN KEY (id_passaro)
+	CONSTRAINT fk_usuario FOREIGN KEY (id_usuario) 
+        REFERENCES usuario (id_usuario)
+        ON DELETE CASCADE,
+	CONSTRAINT fk_passaro FOREIGN KEY (id_passaro) 
         REFERENCES passaro (id_passaro)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE post (
@@ -70,7 +72,6 @@ CREATE TABLE visualizacao(
     aparelho VARCHAR(80),
     browser VARCHAR(80),
     ip VARCHAR(80),
-    ativo TINYINT(1) NOT NULL,
     PRIMARY KEY (id_usuario, id_post, instante),
     FOREIGN KEY (id_usuario)
         REFERENCES usuario (id_usuario),
