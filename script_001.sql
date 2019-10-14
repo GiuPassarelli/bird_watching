@@ -4,7 +4,7 @@ USE bird_watching;
 
 CREATE TABLE usuario (
     id_usuario INT NOT NULL AUTO_INCREMENT,
-    nome VARCHAR(80),
+    nome VARCHAR(80) UNIQUE,
     email VARCHAR(80),
     cidade VARCHAR(80),
     ativo TINYINT(1) NOT NULL,
@@ -24,10 +24,10 @@ CREATE TABLE usuario_passaro (
     id_passaro INT NOT NULL,
     ativo TINYINT(1) NOT NULL,
     PRIMARY KEY (id_usuario, id_passaro),
-	CONSTRAINT fk_usuario FOREIGN KEY (id_usuario) 
+	CONSTRAINT fk_usuario_pref FOREIGN KEY (id_usuario) 
         REFERENCES usuario (id_usuario)
         ON DELETE CASCADE,
-	CONSTRAINT fk_passaro FOREIGN KEY (id_passaro) 
+	CONSTRAINT fk_passaro_pref FOREIGN KEY (id_passaro) 
         REFERENCES passaro (id_passaro)
         ON DELETE CASCADE
 );
@@ -50,10 +50,12 @@ CREATE TABLE post_passaro(
     id_post INT NOT NULL,
     ativo TINYINT(1) NOT NULL,
     PRIMARY KEY (id_passaro, id_post),
-    FOREIGN KEY (id_passaro)
-        REFERENCES passaro (id_passaro),
-    FOREIGN KEY (id_post)
+    CONSTRAINT fk_post_tag FOREIGN KEY (id_post) 
         REFERENCES post (id_post)
+        ON DELETE CASCADE,
+	CONSTRAINT fk_passaro_tag FOREIGN KEY (id_passaro) 
+        REFERENCES passaro (id_passaro)
+        ON DELETE CASCADE
 );
 
 #MENÇÃO (@)
@@ -62,10 +64,12 @@ CREATE TABLE post_usuario(
     id_post INT NOT NULL,
     ativo TINYINT(1) NOT NULL,
     PRIMARY KEY (id_usuario, id_post),
-    FOREIGN KEY (id_usuario)
-        REFERENCES usuario (id_usuario),
-    FOREIGN KEY (id_post)
+    CONSTRAINT fk_usuario_mencao FOREIGN KEY (id_usuario) 
+        REFERENCES usuario (id_usuario)
+        ON DELETE CASCADE,
+	CONSTRAINT fk_post_mencao FOREIGN KEY (id_post) 
         REFERENCES post (id_post)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE visualizacao(

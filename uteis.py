@@ -196,18 +196,58 @@ def remove_usuario_passaro(conn, id_usuario, id_passaro):
 def parser_texto(conn, texto, id_post):
     for word in texto.split():
         if(word[0] == '#'):
-            adiciona_post_passaro(conn, word[1:], id_post)
+            adiciona_post_passaro(conn, id_post, word[1:])
         if(word[0] == '@'):
-            adiciona_post_usuario(conn, word[1:], id_post)
+            adiciona_post_usuario(conn, id_post, word[1:])
 
 #Tag(post_passaro)
 
-def adiciona_post_passaro(conn, id_post, id_passaro):
+def adiciona_post_passaro(conn, id_post, nome_passaro):
     with conn.cursor() as cursor:
+        cursor.execute('SELECT id_passaro FROM passaro WHERE nome = %s', (nome_passaro))
+        id_passaro = cursor.fetchone()
         cursor.execute('INSERT INTO post_passaro (id_post, id_passaro, ativo) VALUES (%s, %s, 1)', (id_post, id_passaro))
+
+def lista_post_de_passaro(conn, id_passaro):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT id_post FROM post_passaro WHERE id_passaro=%s', (id_passaro))
+        res = cursor.fetchall()
+        posts = tuple(x[0] for x in res)
+        return posts
+
+def lista_passaro_de_post(conn, id_post):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT id_passaro FROM post_passaro WHERE id_post=%s', (id_post))
+        res = cursor.fetchall()
+        passaros = tuple(x[0] for x in res)
+        return passaros
+
+def remove_post_passaro(conn, id_post, id_passaro):
+    with conn.cursor() as cursor:
+        cursor.execute('DELETE FROM post_passaro WHERE id_post=%s AND id_passaro=%s', (id_post, id_passaro))
 
 #Mencao(post_usuario)
 
-def adiciona_post_usuario(conn, id_post, id_usuario):
+def adiciona_post_usuario(conn, id_post, nome_usuario):
     with conn.cursor() as cursor:
+        cursor.execute('SELECT id_usuario FROM usuario WHERE nome = %s', (nome_usuario))
+        id_usuario = cursor.fetchone()
         cursor.execute('INSERT INTO post_usuario (id_post, id_usuario, ativo) VALUES (%s, %s, 1)', (id_post, id_usuario))
+
+def lista_post_de_usuario(conn, id_usuario):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT id_post FROM post_usuario WHERE id_usuario=%s', (id_usuario))
+        res = cursor.fetchall()
+        posts = tuple(x[0] for x in res)
+        return posts
+
+def lista_usuario_de_post(conn, id_post):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT id_usuario FROM post_usuario WHERE id_post=%s', (id_post))
+        res = cursor.fetchall()
+        usuarios = tuple(x[0] for x in res)
+        return usuarios
+
+def remove_post_usuario(conn, id_post, id_usuario):
+    with conn.cursor() as cursor:
+        cursor.execute('DELETE FROM post_usuario WHERE id_post=%s AND id_usuario=%s', (id_post, id_usuario))

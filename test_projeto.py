@@ -13,6 +13,7 @@ import datetime
 #TODO: testar update em id
 #      update em coluna e linha que nao existe
 #      triggers
+#      testar o add de um post com tag ou mencao que nao existe
 #      testar relação entre post e usuario (post contem id_usuario)  ????
 
 #Avisar leca que tirei ativo das 3 tabelas de conexao
@@ -588,7 +589,7 @@ class TestProjeto(unittest.TestCase):
 
     #Testes para preferencia(usuario_passaro):
 
-    def test_tabela_perigo_comida(self):
+    def test_tabela_usuario_passaro(self):
         conn = self.__class__.connection
 
         # Cria alguns usuarios.
@@ -669,6 +670,169 @@ class TestProjeto(unittest.TestCase):
         res = lista_passaro_de_usuario(conn, id_usuario2)
         self.assertCountEqual(res, (id_bird3,))
 
+    #Testes para tag(post_passaro):
+
+    def test_tabela_post_passaro(self):
+        conn = self.__class__.connection
+
+        # Cria alguns passaros.
+        info_bird_1 = {"nome": "gaivota", "ativo": 1}
+        info_bird_2 = {"nome": "canario", "ativo": 1}
+        info_bird_3 = {"nome": "arara", "ativo": 1}
+        info_bird_4 = {"nome": "corvo", "ativo": 1}
+
+        cria_passaro(conn, info_bird_1)
+        id_bird1 = acha_passaro(conn, info_bird_1)
+
+        cria_passaro(conn, info_bird_2)
+        id_bird2 = acha_passaro(conn, info_bird_2)
+
+        cria_passaro(conn, info_bird_3)
+        id_bird3 = acha_passaro(conn, info_bird_3)
+
+        cria_passaro(conn, info_bird_4)
+        id_bird4 = acha_passaro(conn, info_bird_4)
+
+        # Cria alguns posts.
+
+        # Adiciona um usuario não existente.
+        info_user = {"nome": "Alessandra", "email": "email@email.com", "cidade": "sao paulo", "ativo": 1}
+        cria_usuario(conn, info_user)
+        id_usuario = acha_usuario(conn, info_user)
+
+        info_post_1 = {"id_usuario": id_usuario, "titulo": "amo passaros", "texto": "adoro a #gaivota #arara #corvo s2", "foto":"img.jpg", "ativo": 1}
+        info_post_2 = {"id_usuario": id_usuario, "titulo": "encontrei mais um", "texto": "vi um #arara #corvo #canario", "foto":"img2.jpg", "ativo": 1}
+
+        cria_post(conn, info_post_1)
+        id_post1 = acha_post(conn, info_post_1)
+
+        cria_post(conn, info_post_2)
+        id_post2 = acha_post(conn, info_post_2)
+
+        # Testa se adicionou a tabela post_passaro
+        res = lista_post_de_passaro(conn, id_bird1)
+        self.assertCountEqual(res, (id_post1,))
+
+        res = lista_post_de_passaro(conn, id_bird2)
+        self.assertCountEqual(res, (id_post2,))
+
+        res = lista_post_de_passaro(conn, id_bird3)
+        self.assertCountEqual(res, (id_post1, id_post2))
+
+        res = lista_post_de_passaro(conn, id_bird4)
+        self.assertCountEqual(res, (id_post1, id_post2))
+
+        res = lista_passaro_de_post(conn, id_post1)
+        self.assertCountEqual(res, (id_bird1, id_bird3, id_bird4))
+
+        res = lista_passaro_de_post(conn, id_post2)
+        self.assertCountEqual(res, (id_bird2, id_bird3, id_bird4))
+
+        # Testa se a remoção de um post causa a remoção das relações entre esse post e seus passaros.
+        remove_post(conn, id_post2)
+
+        res = lista_post_de_passaro(conn, id_bird3)
+        self.assertCountEqual(res, (id_post1,))
+
+        res = lista_post_de_passaro(conn, id_bird4)
+        self.assertCountEqual(res, (id_post1,))
+
+        res = lista_post_de_passaro(conn, id_bird2)
+        self.assertFalse(res)
+
+        # Testa se a remoção de um passaro causa a remoção das relações entre esse passaro e seus posts.
+        remove_passaro(conn, id_bird4)
+
+        res = lista_passaro_de_post(conn, id_post1)
+        self.assertCountEqual(res, (id_bird1, id_bird3))
+
+        # Testa a remoção específica de uma relação post-passaro.
+        remove_post_passaro(conn, id_post1, id_bird1)
+
+        res = lista_passaro_de_post(conn, id_post1)
+        self.assertCountEqual(res, (id_bird3,))
+
+    #Testes para mencao(post_usuario):
+
+    def test_tabela_post_usuario(self):
+        conn = self.__class__.connection
+
+        # Cria alguns usuarios.
+        info_user_1 = {"nome": "Mario", "email": "mario@email.com", "cidade": "curitiba", "ativo": 1}
+        info_user_2 = {"nome": "Isabela", "email": "isabela@gmail.com", "cidade": "rio branco", "ativo": 1}
+        info_user_3 = {"nome": "Marcia", "email": "marcia@email.com", "cidade": "rio de janeiro", "ativo": 1}
+        info_user_4 = {"nome": "Joao", "email": "joao@gmail.com", "cidade": "salvador", "ativo": 1}
+
+        cria_usuario(conn, info_user_1)
+        id_user1 = acha_usuario(conn, info_user_1)
+
+        cria_usuario(conn, info_user_2)
+        id_user2 = acha_usuario(conn, info_user_2)
+
+        cria_usuario(conn, info_user_3)
+        id_user3 = acha_usuario(conn, info_user_3)
+
+        cria_usuario(conn, info_user_4)
+        id_user4 = acha_usuario(conn, info_user_4)
+
+        # Cria alguns posts.
+
+        # Adiciona um usuario não existente.
+        info_user = {"nome": "Alessandra", "email": "email@email.com", "cidade": "sao paulo", "ativo": 1}
+        cria_usuario(conn, info_user)
+        id_usuario = acha_usuario(conn, info_user)
+
+        info_post_1 = {"id_usuario": id_usuario, "titulo": "amo passaros", "texto": "adoro a @Mario @Marcia @Joao s2", "foto":"img.jpg", "ativo": 1}
+        info_post_2 = {"id_usuario": id_usuario, "titulo": "encontrei mais um", "texto": "vi um @Marcia @Joao @Isabela", "foto":"img2.jpg", "ativo": 1}
+
+        cria_post(conn, info_post_1)
+        id_post1 = acha_post(conn, info_post_1)
+
+        cria_post(conn, info_post_2)
+        id_post2 = acha_post(conn, info_post_2)
+
+        # Testa se adicionou a tabela post_usuario
+        res = lista_post_de_usuario(conn, id_user1)
+        self.assertCountEqual(res, (id_post1,))
+
+        res = lista_post_de_usuario(conn, id_user2)
+        self.assertCountEqual(res, (id_post2,))
+
+        res = lista_post_de_usuario(conn, id_user3)
+        self.assertCountEqual(res, (id_post1, id_post2))
+
+        res = lista_post_de_usuario(conn, id_user4)
+        self.assertCountEqual(res, (id_post1, id_post2))
+
+        res = lista_usuario_de_post(conn, id_post1)
+        self.assertCountEqual(res, (id_user1, id_user3, id_user4))
+
+        res = lista_usuario_de_post(conn, id_post2)
+        self.assertCountEqual(res, (id_user2, id_user3, id_user4))
+
+        # Testa se a remoção de um post causa a remoção das relações entre esse post e seus usuarios.
+        remove_post(conn, id_post2)
+
+        res = lista_post_de_usuario(conn, id_user3)
+        self.assertCountEqual(res, (id_post1,))
+
+        res = lista_post_de_usuario(conn, id_user4)
+        self.assertCountEqual(res, (id_post1,))
+
+        res = lista_post_de_usuario(conn, id_user2)
+        self.assertFalse(res)
+
+        # Testa se a remoção de um usuario causa a remoção das relações entre esse usuario e seus posts.
+        remove_usuario(conn, id_user4)
+
+        res = lista_usuario_de_post(conn, id_post1)
+        self.assertCountEqual(res, (id_user1, id_user3))
+
+        # Testa a remoção específica de uma relação post-usuario.
+        remove_post_usuario(conn, id_post1, id_user1)
+
+        res = lista_usuario_de_post(conn, id_post1)
+        self.assertCountEqual(res, (id_user3,))
 
 
 def run_sql_script(filename):
