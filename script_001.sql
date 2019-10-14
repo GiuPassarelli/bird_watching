@@ -39,6 +39,7 @@ CREATE TABLE post (
     texto VARCHAR(240),
     foto VARCHAR(512),
     ativo TINYINT(1) NOT NULL,
+    UNIQUE (id_usuario, titulo, texto),
     PRIMARY KEY (id_post),
     FOREIGN KEY (id_usuario)
         REFERENCES usuario (id_usuario)
