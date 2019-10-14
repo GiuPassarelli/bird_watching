@@ -10,19 +10,7 @@ import pymysql
 from uteis import *
 import datetime
 
-#TODO: testar update em id
-#      update em coluna e linha que nao existe
-#      triggers
-#      testar o add de um post com tag ou mencao que nao existe
-#      testar relação entre post e usuario (post contem id_usuario)  ????
 
-#Avisar leca que tirei ativo das 3 tabelas de conexao
-#Nao esquecer de fazer o dicionario de dados
-
-#Triggers a serem feitos: nao pode adicionar uma coisa que ja existe
-#                         nao pode dar update para uma coisa que ja existe
-#                         nao pode deixar atualizar posts para um usuario inexistente
-#                         nao deixa deletar ????
 
 class TestProjeto(unittest.TestCase):
     @classmethod
@@ -833,6 +821,8 @@ class TestProjeto(unittest.TestCase):
 
         res = lista_usuario_de_post(conn, id_post1)
         self.assertCountEqual(res, (id_user3,))
+
+
 
 
 def run_sql_script(filename):
