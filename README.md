@@ -11,7 +11,7 @@ Na segunda imagem temos o diagrama do modelo relacional:
 ![Diagrama_do_modelo_relacional](imgs/Diagrama_do_modelo_relacional.jpeg)
 
 Por fim temos o dicionário de dados para melhor compreensão:
-![dicionario_de_dados.png](dicionario_de_dados.png)
+![dicionario_de_dados.png](imgs/dicionario_de_dados.png)
 
 Informações adicionais:
 
