@@ -1,4 +1,4 @@
 # bird_watching
 
 
-![Diagrama_do_modelo_relacional](Diagrama_do_modelo_relacional.jpeg)
+![Diagrama_do_modelo_relacional](imgs/Diagrama_do_modelo_relacional.jpeg)
