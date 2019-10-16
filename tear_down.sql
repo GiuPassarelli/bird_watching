@@ -1,1 +1,1 @@
-DROP DATABASE IF EXISTS tranqueira;
+DROP DATABASE IF EXISTS bird_watching;
