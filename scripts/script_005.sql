@@ -1,5 +1,10 @@
 USE bird_watching;
 
+ALTER TABLE post
+    ADD COLUMN (
+        instante DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
 DROP PROCEDURE IF EXISTS lista_posts;
 
 DELIMITER //

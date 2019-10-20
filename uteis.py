@@ -251,3 +251,27 @@ def lista_usuario_de_post(conn, id_post):
 def remove_post_usuario(conn, id_post, id_usuario):
     with conn.cursor() as cursor:
         cursor.execute('DELETE FROM post_usuario WHERE id_post=%s AND id_usuario=%s', (id_post, id_usuario))
+
+#Joinha
+
+def cria_joinha(conn, id_post, id_usuario, joinha):
+    with conn.cursor() as cursor:
+        cursor.execute('INSERT INTO joinha (id_usuario, id_post, joinha) VALUES (%s, %s, %s)', (id_usuario, id_post, joinha))
+
+def lista_joinha_de_usuario(conn, id_usuario):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT id_post FROM joinha WHERE id_usuario=%s', (id_usuario))
+        res = cursor.fetchall()
+        posts = tuple(x[0] for x in res)
+        return posts
+
+def lista_joinha_de_post(conn, id_post):
+    with conn.cursor() as cursor:
+        cursor.execute('SELECT id_usuario FROM joinha WHERE id_post=%s', (id_post))
+        res = cursor.fetchall()
+        usuarios = tuple(x[0] for x in res)
+        return usuarios
+
+def remove_joinha(conn, id_post, id_usuario):
+    with conn.cursor() as cursor:
+        cursor.execute('DELETE FROM joinha WHERE id_usuario=%s AND id_post=%s',(id_usuario, id_post))

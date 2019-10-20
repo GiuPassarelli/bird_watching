@@ -39,7 +39,6 @@ CREATE TABLE post (
     texto VARCHAR(240),
     foto VARCHAR(512),
     ativo TINYINT(1) NOT NULL,
-    instante DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (id_usuario, titulo, texto),
     PRIMARY KEY (id_post),
     FOREIGN KEY (id_usuario)
@@ -51,6 +50,7 @@ CREATE TABLE post_passaro(
     id_passaro INT NOT NULL,
     id_post INT NOT NULL,
     ativo TINYINT(1) NOT NULL,
+    UNIQUE (id_passaro, id_post),
     PRIMARY KEY (id_passaro, id_post),
     CONSTRAINT fk_post_tag FOREIGN KEY (id_post) 
         REFERENCES post (id_post)
@@ -65,6 +65,7 @@ CREATE TABLE post_usuario(
     id_usuario INT NOT NULL,
     id_post INT NOT NULL,
     ativo TINYINT(1) NOT NULL,
+    UNIQUE (id_usuario, id_post),
     PRIMARY KEY (id_usuario, id_post),
     CONSTRAINT fk_usuario_mencao FOREIGN KEY (id_usuario) 
         REFERENCES usuario (id_usuario)

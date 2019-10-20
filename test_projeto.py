@@ -10,7 +10,10 @@ import pymysql
 from uteis import *
 import datetime
 
-
+#TODO: update em coluna e linha que nao existe
+#      triggers
+#      testar o add de um post com tag ou mencao que nao existe
+#      testar relação entre post e usuario (post contem id_usuario)  ????
 
 class TestProjeto(unittest.TestCase):
     @classmethod
@@ -822,7 +825,95 @@ class TestProjeto(unittest.TestCase):
         res = lista_usuario_de_post(conn, id_post1)
         self.assertCountEqual(res, (id_user3,))
 
+    #Testes para joinha:
 
+    def test_tabela_joinha(self):
+        conn = self.__class__.connection
+
+        # Cria alguns usuarios.
+        info_user_1 = {"nome": "Mario", "email": "mario@email.com", "cidade": "curitiba", "ativo": 1}
+        info_user_2 = {"nome": "Isabela", "email": "isabela@gmail.com", "cidade": "rio branco", "ativo": 1}
+        info_user_3 = {"nome": "Marcia", "email": "marcia@email.com", "cidade": "rio de janeiro", "ativo": 1}
+        info_user_4 = {"nome": "Joao", "email": "joao@gmail.com", "cidade": "salvador", "ativo": 1}
+
+        cria_usuario(conn, info_user_1)
+        id_user1 = acha_usuario(conn, info_user_1)
+
+        cria_usuario(conn, info_user_2)
+        id_user2 = acha_usuario(conn, info_user_2)
+
+        cria_usuario(conn, info_user_3)
+        id_user3 = acha_usuario(conn, info_user_3)
+
+        cria_usuario(conn, info_user_4)
+        id_user4 = acha_usuario(conn, info_user_4)
+
+        # Cria alguns posts.
+
+        # Adiciona um usuario não existente.
+        info_user = {"nome": "Alessandra", "email": "email@email.com", "cidade": "sao paulo", "ativo": 1}
+        cria_usuario(conn, info_user)
+        id_usuario = acha_usuario(conn, info_user)
+
+        info_post_1 = {"id_usuario": id_usuario, "titulo": "amo passaros", "texto": "adoro s2", "foto":"img.jpg", "ativo": 1}
+        info_post_2 = {"id_usuario": id_usuario, "titulo": "encontrei mais um", "texto": "vi um passaro", "foto":"img2.jpg", "ativo": 1}
+
+        cria_post(conn, info_post_1)
+        id_post1 = acha_post(conn, info_post_1)
+
+        cria_post(conn, info_post_2)
+        id_post2 = acha_post(conn, info_post_2)
+
+        #Adiciona joinha
+        cria_joinha(conn, id_post1, id_user1, 1)
+        cria_joinha(conn, id_post2, id_user2, 0)
+        cria_joinha(conn, id_post1, id_user3, 2)
+        cria_joinha(conn, id_post2, id_user3, 1)
+        cria_joinha(conn, id_post1, id_user4, 0)
+        cria_joinha(conn, id_post2, id_user4, 1)
+
+        # Testa se adicionou a tabela joinha
+        res = lista_joinha_de_usuario(conn, id_user1)
+        self.assertCountEqual(res, (id_post1,))
+
+        res = lista_joinha_de_usuario(conn, id_user2)
+        self.assertCountEqual(res, (id_post2,))
+
+        res = lista_joinha_de_usuario(conn, id_user3)
+        self.assertCountEqual(res, (id_post1, id_post2))
+
+        res = lista_joinha_de_usuario(conn, id_user4)
+        self.assertCountEqual(res, (id_post1, id_post2))
+
+        res = lista_joinha_de_post(conn, id_post1)
+        self.assertCountEqual(res, (id_user1, id_user3, id_user4))
+
+        res = lista_joinha_de_post(conn, id_post2)
+        self.assertCountEqual(res, (id_user2, id_user3, id_user4))
+
+        # Testa se a remoção de um post causa a remoção das relações entre esse post e seus usuarios.
+        remove_post(conn, id_post2)
+
+        res = lista_joinha_de_usuario(conn, id_user3)
+        self.assertCountEqual(res, (id_post1,))
+
+        res = lista_joinha_de_usuario(conn, id_user4)
+        self.assertCountEqual(res, (id_post1,))
+
+        res = lista_joinha_de_usuario(conn, id_user2)
+        self.assertFalse(res)
+
+        # Testa se a remoção de um usuario causa a remoção das relações entre esse usuario e seus posts.
+        remove_usuario(conn, id_user4)
+
+        res = lista_joinha_de_post(conn, id_post1)
+        self.assertCountEqual(res, (id_user1, id_user3))
+
+        # Testa a remoção específica de uma relação post-usuario.
+        remove_joinha(conn, id_post1, id_user1)
+
+        res = lista_joinha_de_post(conn, id_post1)
+        self.assertCountEqual(res, (id_user3,))
 
 
 def run_sql_script(filename):
