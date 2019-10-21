@@ -254,9 +254,10 @@ def remove_post_usuario(conn, id_post, id_usuario):
 
 #Joinha
 
-def cria_joinha(conn, id_post, id_usuario, joinha):
+def cria_joinha(conn, info):
     with conn.cursor() as cursor:
-        cursor.execute('INSERT INTO joinha (id_usuario, id_post, joinha) VALUES (%s, %s, %s)', (id_usuario, id_post, joinha))
+        cursor.execute('INSERT INTO joinha (id_usuario, id_post, joinha) VALUES (%s, %s, %s)', 
+                       (info["id_usuario"], info["id_post"], info["joinha"]))
 
 def lista_joinha_de_usuario(conn, id_usuario):
     with conn.cursor() as cursor:
@@ -275,3 +276,21 @@ def lista_joinha_de_post(conn, id_post):
 def remove_joinha(conn, id_post, id_usuario):
     with conn.cursor() as cursor:
         cursor.execute('DELETE FROM joinha WHERE id_usuario=%s AND id_post=%s',(id_usuario, id_post))
+
+def acha_post_joinha(conn, id_post):
+    with conn.cursor() as cursor:
+        cursor.execute("""SELECT likes, dislikes FROM post 
+                       WHERE id_post = %s""", id_post)
+        res = cursor.fetchone()
+        if res:
+            return res
+        else:
+            return None
+
+def muda_info_joinha(conn, info):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute('UPDATE joinha SET joinha = %s where id_post = %s AND id_usuario = %s', 
+                           (info["joinha"], info["id_post"], info["id_usuario"]))
+        except pymysql.err.IntegrityError as e:
+            raise ValueError(f'Não posso alterar info do id {info["id_post"], info["id_usuario"]} na tabela joinha')

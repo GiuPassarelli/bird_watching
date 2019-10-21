@@ -10,11 +10,6 @@ import pymysql
 from uteis import *
 import datetime
 
-#TODO: update em coluna e linha que nao existe
-#      triggers
-#      testar o add de um post com tag ou mencao que nao existe
-#      testar relação entre post e usuario (post contem id_usuario)  ????
-
 class TestProjeto(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -578,7 +573,7 @@ class TestProjeto(unittest.TestCase):
         id_novo = acha_visualizacao(conn, info2)
         self.assertEqual(id, id_novo)
 
-    #Testes para preferencia(usuario_passaro):
+    #Teste para preferencia(usuario_passaro):
 
     def test_tabela_usuario_passaro(self):
         conn = self.__class__.connection
@@ -661,7 +656,7 @@ class TestProjeto(unittest.TestCase):
         res = lista_passaro_de_usuario(conn, id_usuario2)
         self.assertCountEqual(res, (id_bird3,))
 
-    #Testes para tag(post_passaro):
+    #Teste para tag(post_passaro):
 
     def test_tabela_post_passaro(self):
         conn = self.__class__.connection
@@ -743,7 +738,7 @@ class TestProjeto(unittest.TestCase):
         res = lista_passaro_de_post(conn, id_post1)
         self.assertCountEqual(res, (id_bird3,))
 
-    #Testes para mencao(post_usuario):
+    #Teste para mencao(post_usuario):
 
     def test_tabela_post_usuario(self):
         conn = self.__class__.connection
@@ -825,7 +820,7 @@ class TestProjeto(unittest.TestCase):
         res = lista_usuario_de_post(conn, id_post1)
         self.assertCountEqual(res, (id_user3,))
 
-    #Testes para joinha:
+    #Teste para joinha:
 
     def test_tabela_joinha(self):
         conn = self.__class__.connection
@@ -865,12 +860,19 @@ class TestProjeto(unittest.TestCase):
         id_post2 = acha_post(conn, info_post_2)
 
         #Adiciona joinha
-        cria_joinha(conn, id_post1, id_user1, 1)
-        cria_joinha(conn, id_post2, id_user2, 0)
-        cria_joinha(conn, id_post1, id_user3, 2)
-        cria_joinha(conn, id_post2, id_user3, 1)
-        cria_joinha(conn, id_post1, id_user4, 0)
-        cria_joinha(conn, id_post2, id_user4, 1)
+        info_joinha1 = {"id_usuario": id_user1, "id_post": id_post1, "joinha": 1}
+        info_joinha2 = {"id_usuario": id_user2, "id_post": id_post2, "joinha": 0}
+        info_joinha3 = {"id_usuario": id_user3, "id_post": id_post1, "joinha": 2}
+        info_joinha4 = {"id_usuario": id_user3, "id_post": id_post2, "joinha": 1}
+        info_joinha5 = {"id_usuario": id_user4, "id_post": id_post1, "joinha": 0}
+        info_joinha6 = {"id_usuario": id_user4, "id_post": id_post2, "joinha": 1}
+
+        cria_joinha(conn, info_joinha1)
+        cria_joinha(conn, info_joinha2)
+        cria_joinha(conn, info_joinha3)
+        cria_joinha(conn, info_joinha4)
+        cria_joinha(conn, info_joinha5)
+        cria_joinha(conn, info_joinha6)
 
         # Testa se adicionou a tabela joinha
         res = lista_joinha_de_usuario(conn, id_user1)
@@ -914,6 +916,51 @@ class TestProjeto(unittest.TestCase):
 
         res = lista_joinha_de_post(conn, id_post1)
         self.assertCountEqual(res, (id_user3,))
+
+    def test_trigger_joinha(self):
+        conn = self.__class__.connection
+
+        # Cria um usuario.
+        info_user_1 = {"nome": "Mario", "email": "mario@email.com", "cidade": "curitiba", "ativo": 1}
+
+        cria_usuario(conn, info_user_1)
+        id_user1 = acha_usuario(conn, info_user_1)
+
+        # Cria alguns posts.
+
+        # Adiciona um usuario não existente.
+        info_user = {"nome": "Alessandra", "email": "email@email.com", "cidade": "sao paulo", "ativo": 1}
+        cria_usuario(conn, info_user)
+        id_usuario = acha_usuario(conn, info_user)
+
+        info_post_1 = {"id_usuario": id_usuario, "titulo": "amo passaros", "texto": "adoro s2", "foto":"img.jpg", "ativo": 1}
+        
+        cria_post(conn, info_post_1)
+        id_post1 = acha_post(conn, info_post_1)
+
+        #Adiciona joinha
+        info_joinha = {"id_usuario": id_user1, "id_post": id_post1, "joinha": 1}
+        cria_joinha(conn, info_joinha)
+
+        # Checa se likes do post = 1.
+        id = acha_post_joinha(conn, id_post1)
+        self.assertCountEqual((1,0), (id))
+
+        #testa se update em joinha muda post
+        info_joinha["joinha"] = 2;
+        muda_info_joinha(conn, info_joinha)
+        id = acha_post_joinha(conn, id_post1)
+        self.assertCountEqual((0,0), (id))
+
+        info_joinha["joinha"] = 0;
+        muda_info_joinha(conn, info_joinha)
+        id = acha_post_joinha(conn, id_post1)
+        self.assertCountEqual((0,1), (id))
+
+        #testa se delete em joinha muda post
+        remove_joinha(conn, id_post1, id_user1)
+        id = acha_post_joinha(conn, id_post1)
+        self.assertCountEqual((0,0), (id))
 
 
 def run_sql_script(filename):
