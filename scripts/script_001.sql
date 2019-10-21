@@ -23,6 +23,7 @@ CREATE TABLE usuario_passaro (
     id_usuario INT NOT NULL,
     id_passaro INT NOT NULL,
     ativo TINYINT(1) NOT NULL,
+    UNIQUE (id_passaro, id_usuario),
     PRIMARY KEY (id_usuario, id_passaro),
 	CONSTRAINT fk_usuario_pref FOREIGN KEY (id_usuario) 
         REFERENCES usuario (id_usuario)
