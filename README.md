@@ -2,15 +2,15 @@
 
 Um mock de uma rede social de observadores de pássaros.
 
-Na primeira imagem temos o modelo de entidade relacionamento da base de dados:
+## Modelo de entidade relacionamento da base de dados:
 
 ![Modelo_Entidade-Relacionamento](imgs/Modelo_Entidade-Relacionamento.jpeg)
 
-Na segunda imagem temos o diagrama do modelo relacional:
+## Diagrama do modelo relacional:
 
-![Diagrama_do_modelo_relacional](imgs/Diagrama_do_modelo_relacional.jpeg)
+![Diagrama_do_modelo_relacional](imgs/Diagrama_do_modelo_relacional_2.png)
 
-Por fim temos o dicionário de dados para melhor compreensão:
+## Dicionário de dados:
 ![dicionario_de_dados.png](imgs/dicionario_de_dados.png)
 
 Informações adicionais:
