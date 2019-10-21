@@ -14,13 +14,13 @@ Um mock de uma rede social de observadores de pássaros.
 
 ### Usuario
 
-NOME | DESCRICAO | AUTO-GERADA? | PK OU FK? | RESTRICOES?
---- | --- | --- | --- | --- | ---
-id_usuario | id do usuário | Sim, auto_increment | PK | not null
-nome | nome de usuário | não | não | unique
-email | email do usuário | não | não | não
-cidade | cidade onde mora | não | não | não
-ativo | quando 1 indica delete lógico | não | não | não
+| NOME | DESCRICAO | AUTO-GERADA? | PK OU FK? | RESTRICOES? |
+| --- | --- | --- | --- | --- |
+| id_usuario | id do usuário | Sim, auto_increment | PK | not null |
+| nome | nome de usuário | não | não | unique |
+| email | email do usuário | não | não | não |
+| cidade | cidade onde mora | não | não | não |
+| ativo | quando 1 indica delete lógico | não | não | não |
 
 ### Post
 
