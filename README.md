@@ -4,7 +4,7 @@ Um mock de uma rede social de observadores de pássaros.
 
 ## Modelo de entidade relacionamento da base de dados:
 
-![Modelo_Entidade-Relacionamento](imgs/Modelo_Entidade-Relacionamento.jpeg)
+![Modelo_Entidade-Relacionamento](imgs/Modelo_Entidade-Relacionamento_2.png)
 
 ## Diagrama do modelo relacional:
 
